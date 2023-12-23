@@ -10,7 +10,7 @@ runtime! debian.vim
 call plug#begin('~/.vim/plugged')
 
 
-Plug 'gruvbox-community/gruvbox'
+Plug 'nanotech/jellybeans.vim'
 Plug 'jiangmiao/auto-pairs' "auto completes [] and () and makes life a bit easier
 Plug 'tpope/vim-commentary' "Comment stuff
 Plug 'tpope/vim-surround' "Allows me to change { to [ and what not
@@ -20,9 +20,34 @@ Plug 'lervag/vimtex'
 Plug 'vim-scripts/vim-mouse'
 Plug 'github/copilot.vim'
 Plug 'scrooloose/nerdtree'
+Plug 'tribela/vim-transparent'
 call plug#end()
 
+" default
+let g:transparent_groups = ['Normal', 'Comment', 'Constant', 'Special', 'Identifier',
+                            \ 'Statement', 'PreProc', 'Type', 'Underlined', 'Todo', 'String',
+                            \ 'Function', 'Conditional', 'Repeat', 'Operator', 'Structure',
+                            \ 'LineNr', 'NonText', 'SignColumn', 'CursorLineNr', 'EndOfBuffer']
 
+" Pmenu
+let g:transparent_groups += ['Pmenu']
+
+" coc.nvim
+let g:transparent_groups += ['NormalFloat', 'CocFloating']
+
+augroup transparent
+    autocmd VimEnter,ColorScheme * call MyTransparent()
+augroup END
+
+function! MyTransparent()
+    " Customize the highlight groups for transparency in here.
+
+    " CursorLine
+    "hi CursorLine ctermfg=NONE ctermbg=239 guibg=NONE guibg=#4e4e4e
+
+    " coc.nvim
+    "hi CocMenuSel ctermbg=239 guibg=#4e4e4e
+endfunction
 
 "Global options
 filetype plugin indent on
@@ -162,7 +187,6 @@ set mouse=a
 syntax enable
 set nocompatible
 syntax on
-colorscheme gruvbox
 filetype plugin on
 filetype indent on
 set number
