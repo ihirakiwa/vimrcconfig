@@ -21,9 +21,59 @@ Plug 'vim-scripts/vim-mouse'
 Plug 'github/copilot.vim'
 Plug 'scrooloose/nerdtree'
 Plug 'tribela/vim-transparent'
+Plug 'junegunn/fzf', {'do': { -> fzf#install() }}
+Plug 'junegunn/fzf.vim'
+Plug 'dense-analysis/ale'
+
 call plug#end()
 
-" default
+syntax enable
+set background=dark
+colorscheme gruvbox
+
+"Numéro de ligne absolu
+
+set number
+
+"Activer ALE pour la détection d'erreurs (linting) et la correction automatique
+let g:ale_linters = {
+    \ 'c': ['gcc'],
+    \ 'python': ['flake8', 'pylint'],
+    \ 'pml': ['spin'],
+    \ }
+
+" Configurer un linter pour Promela (SPIN)
+let g:ale_linter_aliases = {
+    \ 'promela': 'pml',
+    \ }
+
+let g:ale_linters['pml'] = ['spin']
+
+" Spécifier la commande SPIN pour la détection d'erreurs en Promela
+let g:ale_linters_settings = {
+    \ 'pml': {
+    \   'spin': {
+    \     'executable': 'spin',
+    \     'command': 'spin -a %s',
+    \     'callback': function('ale#handlers#detect_errorformat')
+    \   }
+    \ },
+\}
+
+" Activer l'affichage des erreurs à la volée (sans bloquer l'édition)
+let g:ale_lint_on_text_changed = 'always'
+let g:ale_lint_on_enter = 1
+
+" Activer la correction automatique des erreurs si disponible
+let g:ale_fix_on_save = 1
+let g:ale_fixers = {
+    \ 'python': ['autopep8', 'black'],
+    \ 'c': ['clang-format'],
+    \ }
+
+" Afficher les erreurs en bas de l'écran
+let g:ale_echo_cursor = 1" default
+
 let g:transparent_groups = ['Normal', 'Comment', 'Constant', 'Special', 'Identifier',
                             \ 'Statement', 'PreProc', 'Type', 'Underlined', 'Todo', 'String',
                             \ 'Function', 'Conditional', 'Repeat', 'Operator', 'Structure',
@@ -31,24 +81,6 @@ let g:transparent_groups = ['Normal', 'Comment', 'Constant', 'Special', 'Identif
 
 " Pmenu
 let g:transparent_groups += ['Pmenu']
-
-" coc.nvim
-let g:transparent_groups += ['NormalFloat', 'CocFloating']
-
-augroup transparent
-    autocmd VimEnter,ColorScheme * call MyTransparent()
-augroup END
-
-function! MyTransparent()
-    " Customize the highlight groups for transparency in here.
-
-    " CursorLine
-    "hi CursorLine ctermfg=NONE ctermbg=239 guibg=NONE guibg=#4e4e4e
-
-    " coc.nvim
-    "hi CocMenuSel ctermbg=239 guibg=#4e4e4e
-endfunction
-
 "Global options
 filetype plugin indent on
 syntax on "activates syntax highlighting among other things
@@ -74,11 +106,52 @@ set laststatus=2
 set showcmd
 set guifont=MesloLGMDZ\ Nerd\ Font\ Bold\ 16
 
+nnoremap <leader>n :NERDTreeFocus<CR>
+nnoremap <C-n> :NERDTree<CR>
+nnoremap <C-t> :NERDTreeToggle<CR>
 
 
+vnoremap <C-c> "+y
+map <C-v> "+p
+vnoremap<C-c> "*y :let @+=@*<CR> 
 
+"Control f
 
-" Mode insertion
+map <C-f> /
+map <CS-f> :vimgrep /
+"shift+arrow selection
+nmap <S-Up> v<Up>
+nmap <S-Down> v<Down>
+nmap <S-Left> v<Left>
+nmap <S-Right> v<Right>
+vmap <S-Up> <Up>
+vmap <S-Down> <Down>
+vmap <S-Left> <Left>
+vmap <S-Right> <Right>
+imap <S-Up> <Esc>v<Up>
+imap <S-Down> <Esc>v<Down>
+imap <S-Left> <Esc>v<Left>
+imap <S-Right> <Esc>v<Right>
+
+vmap <C-c> y<Esc>i
+vmap <C-x> d<Esc>i
+map <C-v> pi
+imap <C-v> <Esc>pi
+imap <C-z> <Esc>ui
+
+" Aller au début du fichier avec PageUp
+nnoremap <PageUp> gg
+
+" Aller à la fin du fichier avec PageDown
+nnoremap <PageDown> G
+
+nnoremap <C-Left> :tabprevious<CR>
+nnoremap <C-Right> :tabnext<CR>
+    
+" FZF finder shortcut
+nnoremap <C-p> :Files<Cr>
+
+"Mode insertion
 inoremap <C-z> <C-o>:undo<CR>i
 inoremap <C-y> <C-o>:redo<CR>i
 
@@ -104,15 +177,6 @@ nnoremap <C-a> ggVG
 inoremap <C-b> <C-O>:normal! diw<CR>
 inoremap <C-K> <C-O>:normal! dd<CR>
 inoremap <C-D> <C-O>:normal! yyp<CR>
-
-" NErdTree settings
-nmap <C-f> :NERDTreeToggle<CR>
-vmap ++ <plug>NERDCommenterToggle
-nmap ++ <plug>NERDCommenterToggle
-
-" open NERDTree automatically when vim starts up on opening a directory
-autocmd VimEnter * NERDTree
-autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 
 "Vim will load $VIMRUNTIME/defaults.vim if the user does not have a vimrc.
 " This happens after /etc/vim/vimrc(.local) are loaded, so it will override
@@ -217,16 +281,6 @@ set ignorecase
 " Override the ignorecase option if searching for capital letters.
 " This will allow you to search specifically for capital letters.
 set smartcase
-
-" Show partial command you type in the last line of the screen.
-set showcmd
-
-" Show the mode you are on the last line.
-set showmode
-
-" Show matching words during a search.
-set showmatch
-
 " Use highlighting when doing a search.
 set hlsearch
 
